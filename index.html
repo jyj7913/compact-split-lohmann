@@ -97,6 +97,8 @@ input[type=range]::-moz-range-thumb{width:18px;height:18px;border-radius:50%;bac
 .plate img{width:100%;height:auto}
 /* method figures sit straight on the white band; in dark mode they keep a white card so the artwork stays legible */
 .bare{background:transparent;box-shadow:none;padding:0;border-radius:0}
+/* multiply lets the white of a figure take on the band colour (white or light gray) */
+.bare img{mix-blend-mode:multiply}
 @media (prefers-color-scheme:dark){.bare{background:#fff;border-radius:12px;padding:clamp(10px,1.6vw,20px)}}
 .divide{border-top:1px solid var(--line);padding-top:clamp(40px,5.5vw,80px)}
 figure{margin:0}
@@ -239,8 +241,8 @@ footer b{color:var(--hero-ink);font-weight:600}
   </div>
 </section>
 
-<section class="band" id="results" style="padding-top:0">
-  <div class="wrap divide">
+<section class="band soft" id="results">
+  <div class="wrap">
     <div class="sect-head"><h2>Results</h2></div>
 
     <div class="step side">
@@ -269,7 +271,7 @@ footer b{color:var(--hero-ink);font-weight:600}
   </div>
 </section>
 
-<section class="band soft" id="bibtex">
+<section class="band" id="bibtex">
   <div class="wrap">
     <div class="sect-head"><h2>BibTeX</h2></div>
     <div class="bib">

@@ -1,0 +1,425 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Compact Split-Lohmann Lens</title>
+<meta name="description" content="Compact Split-Lohmann Lens via Dual-domain Phase Optimization. SIGGRAPH Asia 2026 Conference Papers.">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Compact Split-Lohmann Lens via Dual-domain Phase Optimization">
+<meta property="og:description" content="SIGGRAPH Asia 2026 Conference Papers. One optimized phase plate and an SLM correction phase replace the 4f relay of the Split-Lohmann lens, shortening the display path to 3f.">
+<meta property="og:url" content="https://jyj7913.github.io/compact-split-lohmann/">
+<meta property="og:image" content="https://jyj7913.github.io/compact-split-lohmann/static/img/og.jpg">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400&display=swap" rel="stylesheet">
+<style>
+/* VOICE  a research project page: precise, calm, quietly confident; the data does the talking
+   IDEA   an optical bench in the dark: the page opens on the prototype's own captures and lets you pull focus
+   PICTURE the refocus viewer: real camera captures through the compact prototypes, near to far on one slider
+   COLOUR lab-black hero band, white figure plates, magenta accent from the talk slides, phase-map cyan as support
+   TYPE   Instrument Sans for headings, Inter for text, JetBrains Mono for the citation only
+   LAYOUT title and authors across the top of the dark band, viewer full width beneath; white bands below
+          with text beside or above each figure; one column under 720px */
+:root{color-scheme:light dark;
+--bg:light-dark(#ffffff,#0f1014);--soft:light-dark(#f5f5f7,#15161b);--ink:light-dark(#15161a,#e8e9ee);
+--muted:light-dark(#585c68,#a4a8b4);--line:light-dark(#e3e4e9,#272932);
+--accent:light-dark(#c2335f,#ff7aa6);--cyan:light-dark(#0b7f99,#5fd0ea);
+--hero:#0d0e12;--hero-ink:#f2f2f5;--hero-muted:#a9adb9;--plate:#ffffff}
+:root[data-theme=light]{color-scheme:light}
+:root[data-theme=dark]{color-scheme:dark}
+*{box-sizing:border-box;min-width:0}
+html{scroll-behavior:smooth;scroll-padding-top:64px}
+body{margin:0;background:var(--bg);color:var(--ink);font:16.5px/1.6 Inter,system-ui,-apple-system,"Segoe UI",sans-serif;overflow-x:clip}
+img,video{max-width:100%;display:block}
+a{color:var(--accent);text-underline-offset:3px}
+h1,h2,h3{font-family:"Instrument Sans",Inter,system-ui,sans-serif;letter-spacing:-.02em;line-height:1.08;margin:0;text-wrap:balance}
+h2{font-size:clamp(28px,3.4vw,40px);font-weight:600}
+h3{font-size:21px;font-weight:600;line-height:1.25}
+p{margin:0 0 1em}
+.wrap{max-width:1180px;margin:0 auto}
+.band{padding:clamp(40px,5.5vw,80px) max(5vw,16px)}
+.soft{background:var(--soft)}
+.muted{color:var(--muted)}
+/* navigation */
+nav{position:sticky;top:0;z-index:20;background:color-mix(in srgb,var(--hero) 92%,transparent);backdrop-filter:blur(8px);border-bottom:1px solid #22242c}
+nav .wrap{display:flex;align-items:center;gap:18px;padding:0 max(5vw,16px);height:56px;overflow-x:auto;scrollbar-width:none}
+nav .home{flex:none;color:var(--hero-ink);font:600 15px "Instrument Sans",sans-serif;text-decoration:none;white-space:nowrap;margin-right:auto}
+nav a.l{flex:none;color:var(--hero-muted);text-decoration:none;font-size:14.5px;white-space:nowrap;padding:16px 2px}
+nav a.l:hover,nav a.l:focus-visible{color:var(--hero-ink)}
+/* hero */
+.hero{background:var(--hero);color:var(--hero-ink);padding:clamp(36px,5vw,64px) max(5vw,16px) clamp(36px,4vw,56px)}
+.hero h1{font-size:clamp(34px,5vw,56px);font-weight:600;max-width:17em}
+.venue{color:#ff8db3;font-weight:600;margin:16px 0 18px;font-size:15.5px}
+.authors{font-size:18px;line-height:1.7;max-width:46em}
+.authors span{white-space:nowrap}
+.authors sup,.aff sup{font-size:.68em;color:var(--hero-muted);margin-left:1px}
+.aff{color:var(--hero-muted);font-size:15px;margin-top:6px;display:flex;flex-wrap:wrap;gap:2px 18px}
+.aff span{white-space:nowrap}
+.btns{display:flex;flex-wrap:wrap;gap:10px;margin-top:22px}
+.btn{display:inline-flex;align-items:center;gap:8px;min-height:44px;padding:0 18px;border-radius:4px;border:1px solid #3a3d48;color:var(--hero-ink);text-decoration:none;font-weight:500;font-size:15px;background:#17181e}
+.btn:hover,.btn:focus-visible{border-color:#ff8db3;background:#1f2027}
+.btn svg{width:17px;height:17px;flex:none}
+/* refocus viewer */
+.viewer{margin-top:clamp(28px,3.5vw,44px);display:grid;grid-template-columns:minmax(0,1fr) 270px;gap:24px;align-items:start}
+.stage{position:relative;background:#000;border-radius:14px;overflow:hidden;aspect-ratio:16/9;box-shadow:0 0 0 1px #23252d}
+.stage canvas{position:absolute;inset:0;width:100%;height:100%;display:block}
+.stage .tag{position:absolute;left:14px;top:12px;font-size:13px;color:#fff;background:rgba(0,0,0,.55);padding:4px 10px;border-radius:4px}
+.panel h3{color:var(--hero-ink);font-size:17px;margin-bottom:8px}
+.group{color:var(--hero-muted);font-size:13px;margin:18px 0 8px}
+.group:first-child{margin-top:0}
+.chips{display:flex;flex-wrap:wrap;gap:8px}
+.chip{min-height:40px;padding:0 14px;border-radius:4px;border:1px solid #363944;background:transparent;color:var(--hero-ink);font:500 14px Inter,sans-serif;cursor:pointer}
+.chip[aria-pressed=true]{background:#f2f2f5;color:#0d0e12;border-color:#f2f2f5}
+.chip:focus-visible,.toggle:focus-visible,input[type=range]:focus-visible{outline:2px solid #ff8db3;outline-offset:2px}
+.focus{margin-top:14px;grid-column:1}
+.focus .row{display:flex;align-items:center;gap:14px}
+.focus label{color:var(--hero-muted);font-size:14px;white-space:nowrap}
+input[type=range]{flex:1;appearance:none;height:44px;background:transparent;cursor:pointer}
+input[type=range]::-webkit-slider-runnable-track{height:4px;border-radius:2px;background:#4a4d59}
+input[type=range]::-moz-range-track{height:4px;border-radius:2px;background:#4a4d59}
+input[type=range]::-webkit-slider-thumb{appearance:none;width:22px;height:22px;border-radius:50%;background:#fff;border:3px solid #0d0e12;box-shadow:0 0 0 2px #fff;margin-top:-9px}
+input[type=range]::-moz-range-thumb{width:18px;height:18px;border-radius:50%;background:#fff;border:3px solid #0d0e12}
+.ticks{display:flex;justify-content:space-between;color:var(--hero-muted);font-size:13px;margin:-6px 0 0;padding:0 2px}
+.cap{color:var(--hero-muted);font-size:14px;margin-top:10px;max-width:60em}
+.toggle{display:none;align-items:center;gap:10px;margin-top:16px;min-height:44px;padding:0 14px;border-radius:4px;border:1px solid #363944;background:transparent;color:var(--hero-ink);font:500 14px Inter,sans-serif;cursor:pointer;text-align:left}
+.toggle.on{display:inline-flex}
+.toggle i{width:34px;height:20px;border-radius:3px;background:#ff8db3;position:relative;flex:none}
+.toggle i::after{content:"";position:absolute;top:3px;left:17px;width:14px;height:14px;border-radius:2px;background:#0d0e12;transition:left .15s}
+.toggle[aria-checked=false] i{background:#454856}
+.toggle[aria-checked=false] i::after{left:3px;background:#c9ccd5}
+/* content */
+.lead{font-size:clamp(19px,2vw,23px);line-height:1.45;max-width:38em;margin:0 0 28px;text-wrap:pretty}
+.plate{background:var(--plate);border-radius:12px;padding:clamp(10px,1.6vw,20px);box-shadow:0 0 0 1px var(--line)}
+.plate img{width:100%;height:auto}
+/* method figures sit straight on the white band; in dark mode they keep a white card so the artwork stays legible */
+.bare{background:transparent;box-shadow:none;padding:0;border-radius:0}
+@media (prefers-color-scheme:dark){.bare{background:#fff;border-radius:12px;padding:clamp(10px,1.6vw,20px)}}
+.divide{border-top:1px solid var(--line);padding-top:clamp(40px,5.5vw,80px)}
+figure{margin:0}
+figcaption{color:var(--muted);font-size:14.5px;margin-top:10px;line-height:1.5}
+.two{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:clamp(24px,4vw,56px);align-items:start}
+.side{display:grid;grid-template-columns:minmax(0,5fr) minmax(0,7fr);gap:clamp(24px,4vw,56px);align-items:center}
+.side.flip{grid-template-columns:minmax(0,7fr) minmax(0,5fr)}
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(14em,1fr));gap:0;border-top:1px solid var(--line);border-bottom:1px solid var(--line);margin:24px 0 0}
+.stat{padding:18px 18px 18px 0}
+.stat b{display:block;font:600 clamp(28px,3.4vw,38px)/1.1 "Instrument Sans",sans-serif;letter-spacing:-.02em;white-space:nowrap}
+.stat span{color:var(--muted);font-size:14.5px}
+.abstract{font-size:17.5px;line-height:1.65;margin-top:clamp(18px,2.4vw,28px)}
+.abstract p:last-child{margin-bottom:0}
+.sect-head{display:flex;align-items:baseline;gap:16px;flex-wrap:wrap;margin-bottom:clamp(20px,3vw,32px)}
+.sect-head p{margin:0;color:var(--muted);max-width:40em}
+.step{padding-top:clamp(32px,4vw,52px);margin-top:clamp(32px,4vw,52px);border-top:1px solid var(--line)}
+.sect-head+.step{border-top:0;margin-top:0;padding-top:0}
+.step h3{margin-bottom:12px}
+.stage-blk{margin-top:clamp(20px,2.6vw,30px)}
+.stage-blk+.stage-blk{margin-top:clamp(36px,4.5vw,56px);padding-top:clamp(28px,3.5vw,44px);border-top:1px dashed var(--line)}
+.stage-blk>p{max-width:52em;margin-bottom:clamp(14px,2vw,22px)}
+.stage-hd{margin:0 0 8px;font:600 18px/1.25 "Instrument Sans",Inter,sans-serif;letter-spacing:-.01em}
+.vids{display:grid;grid-template-columns:minmax(0,3fr) minmax(0,2fr);gap:clamp(20px,3vw,36px)}
+.vid{background:#000;border-radius:12px;overflow:hidden;box-shadow:0 0 0 1px var(--line)}
+.vid video{width:100%;height:auto}
+.loops{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:16px;margin-top:20px}
+.loops figure .vid{aspect-ratio:1/1;display:grid;place-items:center;background:#fff;box-shadow:none;border-radius:8px}
+.loops figure .vid video{width:100%;height:100%;object-fit:contain}
+.num{font-variant-numeric:tabular-nums;white-space:nowrap}
+.bib{position:relative}
+.bib pre{margin:0;background:var(--soft);border:1px solid var(--line);border-radius:12px;padding:20px;padding-right:96px;font:13.5px/1.6 "JetBrains Mono",ui-monospace,Menlo,monospace;overflow-x:auto;color:var(--ink)}
+.copy{position:absolute;top:12px;right:12px;min-height:40px;padding:0 14px;border-radius:4px;border:1px solid var(--line);background:var(--bg);color:var(--ink);font:500 14px Inter,sans-serif;cursor:pointer}
+.copy:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+footer{background:var(--hero);color:var(--hero-muted);font-size:14.5px;padding:36px max(5vw,16px)}
+footer .wrap{display:flex;flex-wrap:wrap;gap:12px 40px;justify-content:space-between}
+footer b{color:var(--hero-ink);font-weight:600}
+@media (max-width:900px){.viewer{grid-template-columns:minmax(0,1fr)}.side,.side.flip,.vids{grid-template-columns:minmax(0,1fr)}}
+@media (max-width:600px){nav .home{display:none}nav .wrap{justify-content:space-between}.two,.loops{grid-template-columns:minmax(0,1fr)}.authors{font-size:16.5px}nav a.l{font-size:14px}.stat{padding:14px 0}}
+@media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}.stage img{transition:none}}
+</style>
+</head>
+<body>
+<nav aria-label="Sections"><div class="wrap">
+  <a class="home" href="#top">Compact Split-Lohmann</a>
+  <a class="l" href="#overview">Overview</a>
+  <a class="l" href="#method">Method</a>
+  <a class="l" href="#results">Results</a>
+  <a class="l" href="#bibtex">BibTeX</a>
+</div></nav>
+
+<header class="hero" id="top">
+  <div class="wrap">
+    <h1>Compact Split-Lohmann Lens via Dual-domain Phase Optimization</h1>
+    <div class="venue">SIGGRAPH Asia 2026 Conference Papers · Kuala Lumpur</div>
+    <div class="authors">
+      <span>Yujin Jeon<sup>1*</sup>,</span> <span>Byounghyo Lee<sup>2*</sup>,</span> <span>Jiwoon Yeom<sup>2</sup>,</span>
+      <span>Gitae Kwak<sup>1</sup>,</span> <span>Jisoo Hong<sup>2†</sup>,</span> <span>Seung-Hwan Baek<sup>1†</sup></span>
+    </div>
+    <div class="aff"><span><sup>1</sup>POSTECH</span><span><sup>2</sup>Korea Electronics Technology Institute (KETI)</span><span>* equal contribution · † corresponding authors</span></div>
+    <div class="btns">
+      <a class="btn" href="https://doi.org/10.1145/3829340.3842337"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M7 3h7l5 5v13H7z"/><path d="M14 3v5h5M10 13h6M10 17h6"/></svg>Paper</a>
+      <a class="btn" href="#bibtex"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M8 7l-5 5 5 5M16 7l5 5-5 5"/></svg>BibTeX</a>
+    </div>
+
+    <div class="viewer">
+      <div>
+        <div class="stage" id="stage" role="img" aria-label="Camera focus sweep through the prototype"><span class="tag" id="tag">Near focus</span></div>
+        <div class="focus">
+          <div class="row"><label for="focus">Camera focus</label><input id="focus" type="range" min="0" max="1" step="0.001" value="0"></div>
+          <div class="ticks" id="ticks"><span>Near</span><span>Mid</span><span>Far</span></div>
+        </div>
+      </div>
+      <div class="panel">
+        <div class="group">Prototype 1</div>
+        <div class="chips" id="p1"></div>
+        <div class="group">Prototype 2</div>
+        <div class="chips" id="p2"></div>
+        <button class="toggle" id="corr" role="switch" aria-checked="true"><i></i><span>SLM correction phase on</span></button>
+      </div>
+    </div>
+  </div>
+</header>
+
+<main>
+<section class="band" id="overview">
+  <div class="wrap">
+    <p class="lead">The Split-Lohmann lens gives every pixel of a near-eye display its own focus, but it needs a 4f relay. We replace the relay lens and cubic phase plate with one optimized phase plate, let the SLM supply a correction phase, and shorten the display path from <b>4f to 3f</b> with the same spatially varying focus.</p>
+    <figure class="plate"><img src="static/img/teaser_mf.jpg" width="1824" height="781" alt="Left: the conventional Split-Lohmann lens and our compact architecture, in which an optimized phase plate replaces the relay lens and cubic phase plate. Right: captured near and far focus of the multifocal display."></figure>
+  </div>
+</section>
+
+<section class="band soft" id="abstract">
+  <div class="wrap">
+    <h2>Abstract</h2>
+    <div class="abstract">
+      <p>Rendering accurate virtual depths in accommodation-supporting near-eye displays relies on generating wavefronts with spatially varying curvature. The Split-Lohmann lens uses a cubic-phase plate, a relay lens, and a spatial light modulator (SLM), offering an effective method for generating these wavefronts. However, its reliance on complex relay optics leads to a bulky form factor, limiting its practicality.</p>
+      <p>Here, we present a compact reformulation of the Split-Lohmann lens. Our approach replaces the bulky relay with a single phase plate and a subsequently optimized SLM phase. This reduces the multifocal-display optical path by 25%, achieving a peak signal-to-noise ratio of 30.74 dB against the baseline. We further show that this compact architecture readily extends to recent spatially varying autofocus systems, delivering precise multi-depth focusing in a reduced form factor. We hope our proposed method improves the practicality of the Split-Lohmann lens.</p>
+    </div>
+  </div>
+</section>
+
+<!-- Video section, hidden for now. Remove the comment markers to restore it, and add the nav link and hero button back.
+<section class="band" id="video">
+  <div class="wrap">
+    <div class="sect-head"><h2>Video</h2><p>A 20-second overview, and the supplementary video with captures from both prototypes.</p></div>
+    <div class="vids">
+      <figure><div class="vid"><video controls preload="metadata" playsinline poster="static/vid/fastforward_poster.jpg" width="1280" height="720"><source src="static/vid/fastforward.mp4" type="video/mp4"></video></div><figcaption>Overview (0:20)</figcaption></figure>
+      <figure><div class="vid"><video controls preload="metadata" playsinline poster="static/vid/supplementary_poster.jpg" width="1280" height="720"><source src="static/vid/supplementary.mp4" type="video/mp4"></video></div><figcaption>Supplementary results (2:02)</figcaption></figure>
+    </div>
+  </div>
+</section>
+-->
+
+<section class="band" id="method">
+  <div class="wrap">
+    <div class="sect-head"><h2>Method</h2></div>
+
+    <div class="step side">
+      <div>
+        <h3>The Split-Lohmann lens, and the part we remove</h3>
+        <p>A Lohmann lens turns the shift between two cubic phase plates into focal power. The Split-Lohmann lens makes that shift local with a phase ramp on an SLM, so every region of the display gets its own focus in a single frame, but it needs a 4f relay to do so.</p>
+        <p class="muted">We keep the first lens and fold the rest of the relay into one phase plate and an SLM correction.</p>
+      </div>
+      <figure class="plate bare"><img loading="lazy" src="static/img/splitlohmann.jpg" width="2000" height="1274" alt="(a) Lohmann lens with two shifted cubic phase plates, (b) Split-Lohmann lens with an SLM phase ramp between relayed cubic plates, (c) our compact layout with a phase plate and SLM correction phase."></figure>
+    </div>
+
+    <div class="step">
+      <h3>Dual-domain phase optimization</h3>
+      <div class="stage-blk">
+        <h4 class="stage-hd">Stage 1: Phase plate</h4>
+        <p>For three candidate layouts, we optimize the phase plate so that the intensity at the SLM plane matches the 4f baseline over 5,286 RGB-D scenes. Only the plate at the Fourier plane of the lens keeps the cubic-phase structure, and it converges to a lens of focal length <i>f</i> plus a cubic phase.</p>
+        <figure class="plate bare"><img loading="lazy" src="static/img/method_s1.jpg" width="2400" height="676" alt="Stage 1: display images with random phase pass through the baseline and a compact candidate; the intensity at the SLM plane is matched and backpropagated to the phase plate, for three configuration candidates."></figure>
+      </div>
+      <div class="stage-blk">
+        <h4 class="stage-hd">Stage 2: SLM correction phase</h4>
+        <p>With the plate fixed, we optimize one global SLM correction, added to the usual depth-dependent ramp, so that the focal stack matches the baseline on 8 planes across 4 D. It converges to a lens of focal length <i>f</i>/2 and is reused for every scene.</p>
+        <figure class="plate bare"><img loading="lazy" src="static/img/method_s2.jpg" width="2400" height="790" alt="Stage 2: RGB-D scenes drive the SLM ramp in the baseline and compact multifocal displays; the focal-stack loss is backpropagated to the global SLM correction phase."></figure>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="band" id="results" style="padding-top:0">
+  <div class="wrap divide">
+    <div class="sect-head"><h2>Results</h2></div>
+
+    <div class="step side">
+      <div>
+        <h3>Prototype 1: fabricated thin phase plate</h3>
+        <p>With the SLM correction phase, the foreground is sharp at near focus and the street behind it at far focus. Without the correction, focus lands in the wrong place; switch it off for the street scene in the viewer above.</p>
+      </div>
+      <figure class="plate bare"><img loading="lazy" src="static/img/result_proto1_ours.jpg" width="1707" height="580" alt="Prototype 1 captures of the street scene with the SLM correction phase, at near and far focus; white boxes mark the zoomed insets."></figure>
+    </div>
+
+    <div class="step side flip">
+      <figure class="plate bare"><img loading="lazy" src="static/img/result_proto2_ours.jpg" width="1857" height="860" alt="Prototype 2 captures of the decanter scene at near and far focus, with zoomed insets of the decanter and the portraits."></figure>
+      <div>
+        <h3>Prototype 2: refractive optics</h3>
+        <p>Here the optimized phase terms are realized with a cubic phase plate and refractive lenses. The decanter is sharp at near focus and the portraits behind it at far focus, on an optical path 25% shorter than the 4f relay.</p>
+      </div>
+    </div>
+
+    <div class="step side">
+      <div>
+        <h3>Spatially varying autofocus</h3>
+        <p>Placing an imaging lens where the display was turns the same compact module into a camera. A per-superpixel contrast search sets the local SLM ramp, bringing details at different depths into focus in one shot.</p>
+      </div>
+      <figure class="plate bare"><img loading="lazy" src="static/img/autofocus.jpg" width="1700" height="1648" alt="Spatially varying autofocus setup and results: initial photo and autofocused photo with zoomed regions at different depths."></figure>
+    </div>
+  </div>
+</section>
+
+<section class="band soft" id="bibtex">
+  <div class="wrap">
+    <div class="sect-head"><h2>BibTeX</h2></div>
+    <div class="bib">
+<pre id="bibtext">@inproceedings{jeon2026compact,
+  title     = {Compact Split-Lohmann Lens via Dual-domain Phase Optimization},
+  author    = {Jeon, Yujin and Lee, Byounghyo and Yeom, Jiwoon and
+               Kwak, Gitae and Hong, Jisoo and Baek, Seung-Hwan},
+  booktitle = {SIGGRAPH Asia 2026 Conference Papers},
+  series    = {SA Conference Papers '26},
+  year      = {2026},
+  location  = {Kuala Lumpur, Malaysia},
+  publisher = {ACM},
+  numpages  = {11},
+  doi       = {10.1145/3829340.3842337}
+}</pre>
+      <button class="copy" id="copy" type="button">Copy</button>
+    </div>
+  </div>
+</section>
+</main>
+
+<footer>
+  <div class="wrap">
+    <div><b>Compact Split-Lohmann Lens</b><br>POSTECH · Korea Electronics Technology Institute</div>
+    <div>Contact: Jisoo Hong (jhong@keti.re.kr), Seung-Hwan Baek (shwbaek@postech.ac.kr)</div>
+    <div>Paper licensed under CC BY 4.0</div>
+  </div>
+</footer>
+
+<script>
+{
+  // Each scene is a camera focus sweep through a prototype: n frames, near (0) to far (n-1).
+  // Frames were equalized to one mean brightness and toned with one gain per scene.
+  const SCENES = [
+    {id:'castle',   p:2, name:'Castle city', n:17, ar:1280/715},
+    {id:'decanter', p:2, name:'Decanter',    n:17, ar:1280/715},
+    {id:'bunny',    p:2, name:'Bunny',       n:18, ar:1280/715},
+    {id:'dots',     p:2, name:'Point grid',  n:3,  ar:1280/715, still:true},
+    {id:'cave',     p:1, name:'Cave',        n:28, ar:800/806},
+    {id:'turtle',   p:1, name:'Turtle',      n:23, ar:800/806},
+    {id:'medieval', p:1, name:'Street',      n:24, ar:800/806, nocorr:3}
+  ];
+  const stage = document.getElementById('stage');
+  const tag = document.getElementById('tag');
+  const slider = document.getElementById('focus');
+  const corr = document.getElementById('corr');
+  let cur = SCENES[0], frames = [], pending = null, correction = true, token = 0;
+  const canvas = document.createElement('canvas');
+  const ctx = canvas.getContext('2d');
+  stage.insertBefore(canvas, tag);
+
+  const chip = s => `<button class="chip" type="button" data-id="${s.id}" aria-pressed="false">${s.name}</button>`;
+  document.getElementById('p2').innerHTML = SCENES.filter(s => s.p === 2).map(chip).join('');
+  document.getElementById('p1').innerHTML = SCENES.filter(s => s.p === 1).map(chip).join('');
+
+  // Frames are decoded up front (ImageBitmap where available) and drawn on one canvas, so the
+  // first pass through a sweep never waits on a decode and never shows an empty frame.
+  // Crossfade: the lower frame is drawn opaque and the upper one on top at alpha f, so the overall
+  // brightness never dips between frames.
+  function decodeFrame(src) {
+    const im = new Image();
+    im.decoding = 'async';
+    im.src = src;
+    return im.decode().then(() => (window.createImageBitmap ? createImageBitmap(im).catch(() => im) : im));
+  }
+
+  function paint() {
+    const n = frames.length;
+    if (!n) return;
+    const v = parseFloat(slider.value), x = v * (n - 1);
+    let i = Math.min(n - 1, Math.floor(x)), f = i >= n - 1 ? 0 : x - i;
+    if (!frames[i] || (f > 0 && !frames[i + 1])) {     // still decoding: hold the nearest frame we have
+      let best = -1;
+      frames.forEach((fr, k) => { if (fr && (best < 0 || Math.abs(k - x) < Math.abs(best - x))) best = k; });
+      if (best < 0) return;                            // nothing ready yet: keep the previous picture
+      i = best; f = 0;
+    }
+    if (pending) {                                     // first frame of a new scene: switch the layout now
+      const s = pending; pending = null;
+      canvas.width = frames[i].width; canvas.height = frames[i].height;
+      stage.style.aspectRatio = String(s.ar);
+      stage.style.maxWidth = s.ar < 1.2 ? 'min(100%, 62vh)' : '';
+      stage.style.marginInline = s.ar < 1.2 ? 'auto' : '';
+    }
+    const W = canvas.width, H = canvas.height;
+    ctx.globalAlpha = 1;
+    ctx.drawImage(frames[i], 0, 0, W, H);
+    if (f > 0.002) { ctx.globalAlpha = f; ctx.drawImage(frames[i + 1], 0, 0, W, H); ctx.globalAlpha = 1; }
+    tag.textContent = (v < 1 / 3 ? 'Near' : v < 2 / 3 ? 'Mid' : 'Far') + ' focus' + (cur.nocorr && !correction ? ' · no correction' : '');
+  }
+
+  function load(s) {
+    cur = s; const my = ++token;
+    frames.forEach(fr => { if (fr && fr.close) fr.close(); });
+    const off = s.nocorr && !correction;
+    const dir = off ? s.id + '_nocorr' : s.id, n = off ? s.nocorr : s.n;
+    frames = new Array(n).fill(null);
+    pending = s;
+    // decode the frames closest to the current focus first
+    const x = parseFloat(slider.value) * (n - 1);
+    const order = [...Array(n).keys()].sort((a, b) => Math.abs(a - x) - Math.abs(b - x));
+    const jobs = order.map(k => decodeFrame(`static/sweep/${dir}/${String(k).padStart(2, '0')}.jpg`)
+      .then(fr => { if (my === token) { frames[k] = fr; paint(); } else if (fr.close) fr.close(); })
+      .catch(() => {}));
+    stage.setAttribute('aria-label', `${s.name}, camera focus sweep through Prototype ${s.p}`);
+    corr.classList.toggle('on', !!s.nocorr);
+    document.querySelectorAll('.chip').forEach(c => c.setAttribute('aria-pressed', String(c.dataset.id === s.id)));
+    return Promise.all(jobs);
+  }
+  document.querySelectorAll('.chip').forEach(c => c.addEventListener('click', () => load(SCENES.find(s => s.id === c.dataset.id))));
+  slider.addEventListener('input', paint);
+  corr.addEventListener('click', () => {
+    correction = !correction;
+    corr.setAttribute('aria-checked', String(correction));
+    corr.querySelector('span').textContent = 'SLM correction phase ' + (correction ? 'on' : 'off');
+    load(cur);
+  });
+  const firstLoad = load(SCENES[0]);
+
+  // one focus pull once the first sweep has loaded: near to far, then back to mid
+  const still = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const stop = () => { slider.dataset.touched = '1'; };
+  slider.addEventListener('pointerdown', stop, {once:true});
+  slider.addEventListener('keydown', stop, {once:true});
+  document.getElementById('p2').addEventListener('click', stop, {once:true});
+  document.getElementById('p1').addEventListener('click', stop, {once:true});
+  if (!still) {
+    Promise.race([firstLoad, new Promise(r => setTimeout(r, 5000))]).then(() => {
+      if (slider.dataset.touched) return;
+      const t0 = performance.now(), dur = 3200;
+      const ease = u => u < .5 ? 2 * u * u : 1 - ((-2 * u + 2) ** 2) / 2;
+      const step = now => {
+        if (slider.dataset.touched) return;
+        const t = Math.min(1, (now - t0) / dur);
+        const v = t < .7 ? ease(t / .7) : 1 - .5 * ease((t - .7) / .3);
+        slider.value = v.toFixed(3);
+        paint();
+        if (t < 1) requestAnimationFrame(step);
+      };
+      setTimeout(() => requestAnimationFrame(step), 400);
+    });
+  }
+
+  const copy = document.getElementById('copy');
+  copy.addEventListener('click', async () => {
+    try { await navigator.clipboard.writeText(document.getElementById('bibtext').textContent); copy.textContent = 'Copied'; }
+    catch (e) { copy.textContent = 'Select and copy'; }
+    setTimeout(() => { copy.textContent = 'Copy'; }, 1800);
+  });
+}
+</script>
+</body>
+</html>
